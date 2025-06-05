@@ -7,12 +7,12 @@ defaults:
 path: ???
 experiment_name: ""
 resume: ""
-out_dir: "./runs"
+out_dir: "~/output"
 n_iterations: 30000
 with_gui: false
 gui_update_from_device: true
 val_frequency: 5000
-num_workers: 24
+num_workers: 16
 use_wandb: false
 wandb_project: "3dgrt"
 test_last: true
@@ -74,7 +74,7 @@ checkpoint:
   iterations: ${int_list:[ 7000, 30000 ]}
 
 optimizer:
-  type: adam # We only support adam and selective_adam for now
+  type: selective_adam # We only support adam and selective_adam for now
   lr: 0.0
   eps: 1.e-15
   params:

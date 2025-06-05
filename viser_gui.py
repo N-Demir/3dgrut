@@ -2,11 +2,8 @@ from threading import Thread
 import torch
 import numpy as np
 import time
-try:
-    import viser
-    import viser.transforms as tf
-except ImportError:
-    print('viser not installed, please run "pip install viser"')
+import viser
+import viser.transforms as tf
 import cv2
 from collections import deque
 import argparse
@@ -153,6 +150,7 @@ if __name__ == "__main__":
         mesh_assets_folder=args.mesh_assets_folder,
         default_config=args.default_config,
     )
+    print("Starting the engine!")
     viewer = ViserViewer(viewer_ip_port=args.port, engine=engine, target_fps=args.target_fps)
     last_time = time.time()
     while True:

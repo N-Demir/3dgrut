@@ -27,6 +27,17 @@ app = modal.App("3dgrut", image=modal.Image.from_registry("nikitademir/3dgrut:la
         "mkdir -p /run/sshd" #, "echo 'PermitRootLogin yes' >> /etc/ssh/sshd_config", "echo 'root: ' | chpasswd" #TODO: uncomment this if the key approach doesn't work
     )
     .add_local_file(Path.home() / ".ssh/id_rsa.pub", "/root/.ssh/authorized_keys", copy=True)
+    # Install and configure Git
+    .run_commands("apt-get install -y git")
+    .run_commands("git config --global pull.rebase true")
+    .run_commands("git config --global user.name 'Nikita Demir'")
+    .run_commands("git config --global user.email 'nikitde1@gmail.com'")
+    # TODO: Remove these after testing the viewer works
+    ### Add local code (at the very end to not reinstall everything)
+    .workdir("/workspace")
+    .add_local_file("requirements.txt", "/workspace/requirements.txt", copy=True)
+    .run_commands("/opt/conda/bin/conda run -n 3dgrut pip install -r requirements.txt")
+    .add_local_dir(".", "/workspace")
 )
 
 
