@@ -32,9 +32,12 @@ app = modal.App("3dgrut", image=modal.Image.from_registry("nikitademir/3dgrut:la
     .run_commands("git config --global pull.rebase true")
     .run_commands("git config --global user.name 'Nikita Demir'")
     .run_commands("git config --global user.email 'nikitde1@gmail.com'")
+    # Build the ninja code
+    .workdir("/workspace")
+    .run_commands("gcloud storage rsync -r gs://tour_storage/data/tandt/truck /build_data/tandt/truck")
+    .run_commands("/opt/conda/bin/conda run -n 3dgrut python train.py --config-name apps/colmap_3dgut_mcmc.yaml path=/build_data/tandt/truck optimizer.type=selective_adam n_iterations=5 num_workers=1", gpu="T4")
     # TODO: Remove these after testing the viewer works
     ### Add local code (at the very end to not reinstall everything)
-    .workdir("/workspace")
     .add_local_file("requirements.txt", "/workspace/requirements.txt", copy=True)
     .run_commands("/opt/conda/bin/conda run -n 3dgrut pip install -r requirements.txt")
     .add_local_dir(".", "/workspace")
