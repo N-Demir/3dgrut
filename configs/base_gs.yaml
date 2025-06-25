@@ -76,7 +76,7 @@ model:
   print_stats: true
 
 checkpoint:
-  iterations: ${int_list:[ 7000, 30000 ]}
+  iterations: ${int_list:[ 2000, 5000, 10000, 20000, 30000 ]}
 
 optimizer:
   type: selective_adam # We only support adam and selective_adam for now
