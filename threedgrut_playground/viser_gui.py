@@ -152,7 +152,7 @@ if __name__ == "__main__":
     parser.add_argument(
         '--default_gs_config',
         type=str,
-        default='apps/colmap_3dgrt.yaml',
+        default='apps/colmap_3dgut.yaml',
         help="Name of default config to use for .ingp, .ply files, or .pt files not trained with 3dgrt."
     )
     parser.add_argument(
