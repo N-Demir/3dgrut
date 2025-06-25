@@ -179,8 +179,8 @@ class Renderer:
             pred_img_to_write = pred_rgb_full[-1].clip(0, 1.0)
             gt_img_to_write = rgb_gt_full[-1].clip(0, 1.0)
 
-            if self.writer is not None:
-                test_images.append(pred_img_to_write)
+            # if self.writer is not None:
+            #     test_images.append(pred_img_to_write)
 
             if self.save_gt:
                 torchvision.utils.save_image(
@@ -210,17 +210,24 @@ class Renderer:
                     rgb_gt_full.permute(0, 3, 1, 2),
                 ).item()
             )
-            lpips.append(
-                criterions["lpips"](
-                    pred_rgb_full.clip(0, 1).permute(0, 3, 1, 2),
-                    rgb_gt_full.permute(0, 3, 1, 2),
-                ).item()
-            )
+            # Calculating this next step can totally break the gpu memory for some reason
+            # torch.Size([1, 3024, 4032, 3]) is too much for this lpips function somehow. Leads to like 10gbs of memory usage
+            lpips.append(0.00)
+            # lpips.append(
+            #     criterions["lpips"](
+            #         pred_rgb_full.clip(0, 1).permute(0, 3, 1, 2),
+            #         rgb_gt_full.permute(0, 3, 1, 2),
+            #     ).item()
+            # )
 
             # Record the time
             inference_time.append(outputs["frame_time_ms"])
 
             logger.log_progress(task_name="Rendering", advance=1, iteration=f"{str(iteration)}", psnr=psnr[-1])
+
+            # Delete the GPU-cached batch
+            del gpu_batch
+            torch.cuda.empty_cache()
 
         logger.end_progress(task_name="Rendering")
 
@@ -248,13 +255,13 @@ class Renderer:
             self.writer.add_scalar("lpips/test", mean_lpips, self.global_step)
             self.writer.add_scalar("time/inference/test", mean_inference_time, self.global_step)
 
-            if len(test_images) > 0:
-                self.writer.add_images(
-                    "image/pred/test",
-                    torch.stack(test_images),
-                    self.global_step,
-                    dataformats="NHWC",
-                )
+            # if len(test_images) > 0:
+            #     self.writer.add_images(
+            #         "image/pred/test",
+            #         torch.stack(test_images),
+            #         self.global_step,
+            #         dataformats="NHWC",
+            #     )
 
             if best_psnr_img is not None:
                 self.writer.add_images(
