@@ -42,7 +42,7 @@ WORKDIR /root/workspace
 ###### Method Installation ######
 # Pulling from a repo is probably the easiest
 # eg: RUN git clone https://github.com/graphdeco-inria/gaussian-splatting.git . --recursive
-RUN git clone https://github.com/nv-tlabs/3dgrut.git --recursive .
+RUN git clone https://github.com/N-Demir/3dgrut.git --recursive -b nvs-leaderboard .
 
 # Install (avoid conda installs because they don't work well in dockerfile situations)
 # Separating these on separate lines helps if there are errors (previous lines will be cached) especially on the large package installs
