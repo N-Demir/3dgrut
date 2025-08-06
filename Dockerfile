@@ -1,48 +1,59 @@
-FROM ubuntu:24.04
+# TODO: Add an example
+###### How to edit this file ######
+# Docker and Dockerfiles are quite simple:
+# - a dockerfile is the set of instructions for getting a fresh machine ready to run your code
+# - start by defining a base image (FROM ...) based on the cuda and torch version you want. This gets the hard gpu driver stuff out of the way
+# - set env vars with ENV ..., change directories with WORKDIR ..., and run commands with RUN ...
+# - avoid using conda installs (just replace them with pip installs) because getting conda initialized in docker is a pain
+# 
+# Beam will handle building the docker image from this file, but you can also build it yourself and run it wherever you want
 
-ARG CUDA_VERSION=11.8.0
-ENV CUDA_VERSION=${CUDA_VERSION}
+FROM pytorch/pytorch:2.1.2-cuda11.8-cudnn8-devel
+
+# Set Torch CUDA Compatbility to be for RTX 4090, T4, and A100
+# If using a different GPU, make sure its torch cuda architecture version is added to the list
+ENV TORCH_CUDA_ARCH_LIST="7.5;8.0;8.9;9.0"
+
+# Install git and various other helper dependencies
+# Set environment variable to avoid interactive prompts from installing packages
 ENV DEBIAN_FRONTEND=noninteractive
-RUN apt-get update \
-    && DEBIAN_FRONTEND=noninteractive apt-get install -y --allow-unauthenticated ca-certificates \
-    && DEBIAN_FRONTEND=noninteractive apt-get install -y -qq --no-install-recommends \
-    wget git \
-    curl \
+ENV TZ=America/New_York
+RUN apt-get update && apt-get install -y \
+    git \
+    wget \
+    unzip \
+    cmake \
     build-essential \
-    gcc-11 g++-11 \
-    libgl1-mesa-dev \
-    libglib2.0-0 \
+    ninja-build \
+    libglew-dev \
+    libassimp-dev \
+    libboost-all-dev \
+    libgtk-3-dev \
+    libopencv-dev \
+    libglfw3-dev \
+    libavdevice-dev \
+    libavcodec-dev \
+    libeigen3-dev \
+    libxxf86vm-dev \
     && rm -rf /var/lib/apt/lists/*
 
-RUN curl -o ~/miniconda.sh https://repo.anaconda.com/miniconda/Miniconda3-py311_25.1.1-2-Linux-x86_64.sh && \
-    bash ~/miniconda.sh -b -p /opt/conda && \
-    rm ~/miniconda.sh && \
-    /opt/conda/bin/conda install -y python=${PYTHON_VERSION} && \
-    /opt/conda/bin/conda clean -ya
-ENV PATH=/opt/conda/bin:$PATH
-RUN conda init
+WORKDIR /root/workspace
 
-ENV NVIDIA_VISIBLE_DEVICES=all
-ENV NVIDIA_DRIVER_CAPABILITIES=compute,utility,graphics
-ENV FORCE_CUDA=1
+###### Method Installation ######
+# Pulling from a repo is probably the easiest
+# eg: RUN git clone https://github.com/graphdeco-inria/gaussian-splatting.git . --recursive
+RUN git clone https://github.com/nv-tlabs/3dgrut.git --recursive .
 
-# # Make sure TORCH_CUDA_ARCH_LIST matches the pytorch wheel setting.
-# # Reference: https://github.com/pytorch/pytorch/blob/main/.ci/manywheel/build_cuda.sh#L54
-# #
-# # (cuda11) $ python -c "import torch; print(torch.version.cuda, torch.cuda.get_arch_list())"
-# # 11.8 ['sm_50', 'sm_60', 'sm_61', 'sm_70', 'sm_75', 'sm_80', 'sm_86', 'sm_37', 'sm_90', 'compute_37']
-# #
-# # (cuda12) $ python -c "import torch; print(torch.version.cuda, torch.cuda.get_arch_list())"
-# # 12.8 ['sm_75', 'sm_80', 'sm_86', 'sm_90', 'sm_100', 'sm_120', 'compute_120']
-# #
-# RUN if   [ "$CUDA_VERSION" = "11.8.0" ]; then                                                        \
-#       echo 'export TORCH_CUDA_ARCH_LIST="7.0;7.5;8.0;8.6;9.0"' >> /etc/profile.d/cuda_arch.sh;       \
-#     elif [ "$CUDA_VERSION" = "12.8.1" ]; then                                                        \
-#       echo 'export TORCH_CUDA_ARCH_LIST="7.5;8.0;8.6;9.0;10.0;12.0"' >> /etc/profile.d/cuda_arch.sh; \
-#     fi
+# Install (avoid conda installs because they don't work well in dockerfile situations)
+# Separating these on separate lines helps if there are errors (previous lines will be cached) especially on the large package installs
+# eg:
+# RUN pip install submodules/diff-gaussian-rasterization
+# RUN pip install submodules/simple-knn
+# RUN pip install submodules/fused-ssim
+# RUN pip install -e .
 
-WORKDIR /workspace
-COPY . .
+# Note: If your install needs access to a gpu it's actually possible to do that through Beam's python sdk. Check their docs or reach out!
 
-RUN CUDA_VERSION=$CUDA_VERSION bash ./install_env.sh 3dgrut WITH_GCC11 
-RUN echo "conda activate 3dgrut" >> ~/.bashrc
+RUN pip install kaolin==0.17.0 -f https://nvidia-kaolin.s3.us-east-2.amazonaws.com/torch-2.1.2_cu118.html
+RUN pip install -r requirements.txt
+RUN pip install -e .
