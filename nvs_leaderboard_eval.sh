@@ -40,22 +40,18 @@ rm -fr output_renders/
 
 python train.py --config-name apps/colmap_3dgut_mcmc.yaml \
     path=/nvs-leaderboard-data/$scene \
-    optimizer.type=selective_adam \
-    n_iterations=10 \
-    checkpoint.iterations=[10]
+    optimizer.type=selective_adam
 
 # Render the test split
 # eg: python render.py --data /nvs-leaderboard-data/$scene/test --output /nvs-leaderboard-output/$scene/$method/ 
 
-checkpoint_path=$(find runs/ -name "ckpt_last.pt")
-
+checkpoint_path="$(find runs/ -name "ckpt_last.pt")"
 python render.py \
     --checkpoint $checkpoint_path \
     --path /nvs-leaderboard-data/$scene \
     --out-dir output_renders/
 
-renders_folder=$(find output_renders/ -name "renders")
-
+renders_folder="$(find output_renders/ -type d -name "renders")"
 mv $renders_folder $expected_output_folder
 
 # At the end, move your renders into the `expected_output_folder`
