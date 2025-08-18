@@ -12,7 +12,7 @@ from modal import Image
 image = (
     Image
     # Change this base image to whatever torch/cuda version you want
-    .from_registry("pytorch/pytorch:2.4.1-cuda12.4-cudnn9-devel")
+    .from_registry("pytorch/pytorch:2.4.1-cuda11.8-cudnn9-devel")
     .env(
         {
             # Set Torch CUDA Compatbility to be for RTX 4090, T4, L40s, and A100
