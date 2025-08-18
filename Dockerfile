@@ -8,7 +8,7 @@
 # 
 # Beam will handle building the docker image from this file, but you can also build it yourself and run it wherever you want
 
-FROM pytorch/pytorch:2.1.2-cuda11.8-cudnn8-devel
+FROM pytorch/pytorch:2.4.1-cuda11.8-cudnn9-devel
 
 # Set Torch CUDA Compatbility to be for RTX 4090, T4, and A100
 # If using a different GPU, make sure its torch cuda architecture version is added to the list
@@ -54,6 +54,6 @@ RUN git clone https://github.com/N-Demir/3dgrut.git --recursive -b nvs-leaderboa
 
 # Note: If your install needs access to a gpu it's actually possible to do that through Beam's python sdk. Check their docs or reach out!
 
-RUN pip install kaolin==0.17.0 -f https://nvidia-kaolin.s3.us-east-2.amazonaws.com/torch-2.1.2_cu118.html
+RUN pip install kaolin==0.17.0 -f https://nvidia-kaolin.s3.us-east-2.amazonaws.com/torch-2.4.1_cu118.html
 RUN pip install -r requirements.txt
 RUN pip install -e .
