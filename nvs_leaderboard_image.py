@@ -6,6 +6,7 @@
 # - avoid using conda installs (just replace them with pip installs) because getting conda initialized in docker is a pain
 # 
 # Beam will handle building the docker image from this file, but you can also build it yourself and run it wherever you want
+from pathlib import Path
 from modal import Image
 
 image = (
@@ -50,7 +51,7 @@ image = (
             libxxf86vm-dev \
             && rm -rf /var/lib/apt/lists/*"
     )
-    .workdir("/root/workspace")
+    .workdir(f"/root/{Path.cwd().name}")
 
     ###### Your Code Here ######
     # Would recommend pulling the repo from github (we later overwrite it with the current local directory) 
@@ -62,4 +63,15 @@ image = (
     # .run_commands("pip install -e .")
     # .run_commands("pip install submodules/diff-gaussian-rasterization")
     # Note: If your run_commands step needs access to a gpu it's actually possible to do that through "run_commands(gpu='T4', ...)"
+    .run_commands(
+        "git clone https://github.com/N-Demir/3dgrut.git --recursive -b nvs-leaderboard ."
+    )
+
+    .run_commands(
+        "pip install kaolin==0.17.0 -f https://nvidia-kaolin.s3.us-east-2.amazonaws.com/torch-2.4.1_cu118.html"
+    )
+    .run_commands(
+        "pip install -r requirements.txt"
+    )
+    .run_commands("pip install -e .")
 )
