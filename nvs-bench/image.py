@@ -98,5 +98,7 @@ image = (
     .run_commands("pip install -e .")
     # Running a quick training run just to prebuild some of the cuda libraries so that we don't repeatedly spend time doing them on actual runs
     # notice the usage of a gpu
-    .run_commands("python train.py --config-name apps/colmap_3dgut_mcmc.yaml path=nvs-bench/build_run_data/examples/kitchen/ optimizer.type=selective_adam n_iterations=1", gpu="T4")
+    # Reduce num_workers to avoid shared memory issues during build
+    #   num_workers=1 - takes care of a shared memory error modal gave
+    .run_commands("python train.py --config-name apps/colmap_3dgut_mcmc.yaml path=nvs-bench/build_run_data/examples/kitchen/ optimizer.type=selective_adam n_iterations=1 num_workers=1", gpu="T4")
 )
