@@ -96,4 +96,7 @@ image = (
         "pip install -r requirements.txt"
     )
     .run_commands("pip install -e .")
+    # Running a quick training run just to prebuild some of the cuda libraries so that we don't repeatedly spend time doing them on actual runs
+    # notice the usage of a gpu
+    .run_commands("python train.py --config-name apps/colmap_3dgut_mcmc.yaml path=nvs-bench/build_run_data/examples/kitchen/ optimizer.type=selective_adam n_iterations=1", gpu="T4")
 )
