@@ -29,7 +29,7 @@ rm -fr output_renders/
 python train.py --config-name apps/colmap_3dgut_mcmc.yaml \
     path=$data_folder \
     optimizer.type=selective_adam \
-    n_iterations=10
+    n_iterations=30000
 
 checkpoint_path="$(find runs/ -name "ckpt_last.pt")"
 python render.py \
@@ -38,4 +38,4 @@ python render.py \
     --out-dir output_renders/
 
 renders_folder="$(find output_renders/ -type d -name "renders")"
-mv $renders_folder $output_folder
+mv $renders_folder $output_folder/test_renders
