@@ -86,4 +86,14 @@ image = (
     # .run_commands("pip install submodules/diff-gaussian-rasterization")
     # .run_commands("pip install -e .")
     # Note: If your run_commands step needs access to a gpu it's actually possible to do that through "run_commands(gpu='L40S', ...)"
+    .run_commands(
+        "git clone https://github.com/N-Demir/3dgrut.git --recursive -b nvs-bench ."
+    )
+    .run_commands(
+        "pip install kaolin==0.17.0 -f https://nvidia-kaolin.s3.us-east-2.amazonaws.com/torch-2.4.1_cu118.html"
+    )
+    .run_commands(
+        "pip install -r requirements.txt"
+    )
+    .run_commands("pip install -e .")
 )

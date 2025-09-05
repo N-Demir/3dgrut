@@ -17,3 +17,25 @@ output_folder=$2
 #   python render.py --data $data_folder/test --output $output_folder --eval
 # 3) Move the renders into `$output_folder/test_renders`
 #   mv $output_folder/test/ours_30000/renders $output_folder/test_renders
+
+
+# 3DGRUT is a little tricky because the outputs have a unique random identifier that cannot be
+# set in the run config, so we don't know in advance what the checkpoint path will be or the
+# renders output. Hence using newly created folders in which this run's output folder will be
+# the only subfolder. 
+rm -fr runs/
+rm -fr output_renders/
+
+python train.py --config-name apps/colmap_3dgut_mcmc.yaml \
+    path=$data_folder \
+    optimizer.type=selective_adam \
+    n_iterations=10
+
+checkpoint_path="$(find runs/ -name "ckpt_last.pt")"
+python render.py \
+    --checkpoint $checkpoint_path \
+    --path $data_folder \
+    --out-dir output_renders/
+
+renders_folder="$(find output_renders/ -type d -name "renders")"
+mv $renders_folder $output_folder
